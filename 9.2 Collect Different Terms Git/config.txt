@@ -1,0 +1,6 @@
+Num of points
+1
+Start order | Finish Order 
+2 6
+A operators amount
+3
