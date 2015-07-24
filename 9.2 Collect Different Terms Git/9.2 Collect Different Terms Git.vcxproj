@@ -80,6 +80,7 @@
     <Text Include="nodenums.txt" />
     <Text Include="points.txt" />
     <Text Include="ReadMe.txt" />
+    <Text Include="Results\res_0.00_2_3.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

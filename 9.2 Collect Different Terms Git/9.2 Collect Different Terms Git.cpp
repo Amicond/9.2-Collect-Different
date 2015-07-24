@@ -788,6 +788,7 @@ public:
 		int max; //номер у которого импульс k2
 		int da, db;
 		int type[3];
+		bool if_empty, total_empty1, total_empty2;
 		ostringstream cos2;
 		if (a_amount == 3)
 		{
@@ -817,10 +818,38 @@ public:
 							}
 							cos2.str("");
 							outF << "+" << a_ops_l[i].coeff*a_ops_l[j].coeff;
-							for (int mm = 0; mm < 3; mm++)
+							//выводим 2 первых функции Грина
+							for (int mm = 0; mm < 2; mm++)
 							{
-								outF << "*Subscript[" << green_func[type[(k + mm) % 3]] << "," << momenta_names[mm] << "]";
+								outF << "*" << green_func[type[(k + mm) % 3]] << "_" << momenta_names[mm] ;
 							}
+							//вычисляем третий импульс через первые два
+							outF << "*" << green_func[type[(k + 2) % 3]] << "_(";
+							if (signs1[(k + 2) % 3] == 1)
+							{
+								if (-signs1[k] == -1)
+									outF << "-" << momenta_names[0];
+								else
+									outF  << momenta_names[0];
+								if (-signs1[(k + 1) % 3]==-1)
+									outF<< "-" << momenta_names[1] << ")";
+								else
+									outF << "+" << momenta_names[1] << ")";
+							}
+							else
+							{ 
+								if (signs1[k] == -1)
+									outF << "-" << momenta_names[0];
+								else
+									outF << momenta_names[0];
+								if (signs1[(k + 1) % 3] == -1)
+									outF << "-" << momenta_names[1] << ")";
+								else
+									outF << "+" << momenta_names[1] << ")";
+							}
+								
+
+							//
 
 							outF << "*DiracDelta[";
 							for (int mm = 0; mm < 3; mm++)
@@ -832,24 +861,87 @@ public:
 							{
 								outF << "+(" << signs1[(k + mm) % 3] << ")*" << momenta_names[mm] << "b";
 							}
-							outF << "]*DiracDelta[";
+							/*outF << "]*DiracDelta[";
 							for (int mm = 0; mm < 3; mm++)
 							{
 								outF << "+(" << signs1[(k + mm) % 3] << ")*" << momenta_names[mm];
-							}
+							}*/
 
 							outF << "]*Cos[";
 							cos2 << "*Cos[";
+							total_empty1 = true;
+							total_empty2 = true;
 							for (int mm = 0; mm<3; mm++)
 							{
 								int temp_n = (k + mm) % 3;
 								findCos(m, matrix_size, a_ops_l[i].node[(k + mm) % 3], da, db);
-								outF << "+" << signs1[(k + mm) % 3] << "*(" << momenta_names[mm] << "a*" << da << "+" << momenta_names[mm] << "b*" << db << ")";
+								if (da != 0 || db != 0)
+								{
+									total_empty1 = false;
+									if (signs1[(k + mm) % 3] == 1)//знак плюс
+										outF << "+(";
+									else
+										outF << "-(";
+									if_empty = true;
+									if (da != 0)
+									{
+										outF << momenta_names[mm] << "a*" << da;
+										if_empty = false;
+									}
+									if (db != 0)
+									{
+										if (!if_empty)//есть член с da
+											outF << "+" << momenta_names[mm] << "b*" << db << ")";
+										else//нет члена с da, + не нужен
+											outF << momenta_names[mm] << "b*" << db << ")";
+									}
+									else
+									{
+										if (!if_empty)
+											outF << ")";
+										else
+											outF << "0)";
+									}
+								}
+
+
 								findCos(m, matrix_size, a_ops_l[j].node[out_pair[l][(k + mm) % 3]], da, db);
-								cos2 << "+" << signs2[out_pair[l][(k + mm) % 3]] << "*(" << momenta_names[mm] << "a*" << da << "+" << momenta_names[mm] << "b*" << db << ")";
+								//cos2 << "+" << signs2[out_pair[l][(k + mm) % 3]] << "*(" << momenta_names[mm] << "a*" << da << "+" << momenta_names[mm] << "b*" << db << ")";
+								if (da != 0 || db != 0)
+								{
+									total_empty2 = false;
+									if (signs2[out_pair[l][(k + mm) % 3]] == 1)//знак плюс
+										cos2 << "+(";
+									else
+										cos2 << "-(";
+									if_empty = true;
+									if (da != 0)
+									{
+										cos2 << momenta_names[mm] << "a*" << da;
+										if_empty = false;
+									}
+									if (db != 0)
+									{
+										if (!if_empty)//есть член с da
+											cos2 << "+" << momenta_names[mm] << "b*" << db << ")";
+										else//нет члена с da, + не нужен
+											cos2 << momenta_names[mm] << "b*" << db << ")";
+									}
+									else
+									{
+										if (!if_empty)
+											cos2 << ")";
+										else
+											cos2 << "0)";
+									}
+								}
 							}
+							if (total_empty1)
+								outF << "0";
 							outF << "]";
 							outF << cos2.str();
+							if (total_empty2)
+								outF << "0";
 							outF << "]";
 
 						}

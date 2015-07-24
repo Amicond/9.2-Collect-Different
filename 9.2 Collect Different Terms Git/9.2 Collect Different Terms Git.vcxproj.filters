@@ -25,6 +25,9 @@
     <Text Include="points.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="Results\res_0.00_2_3.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
